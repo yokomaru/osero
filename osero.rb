@@ -1,129 +1,148 @@
 class Osero
-  WHITE = 0
-  BLACK = 1
+  WHITE = "○"
+  BLACK = "●"
+  BLANK = "."
+  GOBAN_NUM = 8
+  CHECKING_DIRECTIONS = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 0], [0, 1], [1, -1], [1, 0], [1, 1]]
 
-    def game_start
-      goban = []
-      goban_num = 4
-      check_array = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 0], [0, 1], [1, -1], [1, 0], [1, 1]]
+  def game_start
 
-      make_field(goban_num, goban)
-      # 碁盤のチェック用配列
-      preview_goban(goban)
+    goban = make_field
+    # 碁盤のチェック用配列
+    preview_goban(goban)
 
-      # 碁盤に置ける場所がなくなるまでループ
-      while goban.flatten.include?(nil) do
-        puts "あなたは○です。置きたいところを入力してください"
+    # 碁盤に置ける場所がなくなるまでループ
+    while goban.flatten.include?(".") do
+      puts "あなたは○です。置きたいところを入力してください"
 
-        # ユーザーのキーワード入力を待機
-        input_val = gets
+      # ユーザーのキーワード入力を待機
+      input_val = gets
 
-        # 入力値を配列に変換
-        input_num = input_val.chomp.split(",").map(&:to_i)
+      # 入力値を配列に変換
+      input_num = input_val.chomp.split(",").map(&:to_i)
 
-        # 入力値チェック
-        # 　入力した値が範囲外の場合は再入力
-        # 　入力値が1つの場合は再入力
-        next if input_num.size == 1
+      # 入力値チェック
+      # 入力した値が範囲外の場合は再入力
+      # 入力値が1つの場合は再入力
+      next if input_num.size == 1
 
+      if check_if_disk_can_put(goban, input_num, WHITE, BLACK)
         # 入力された箇所に白の碁を置く
         goban[input_num[0]][input_num[1]] = WHITE
-
-        # 置いた碁の周囲をチェックし、黒の碁があれば白に変換する
-        check_array.each do |c|
-          if goban.dig(input_num[0] + c[0], input_num[1] + c[1]) == BLACK
-            goban[input_num[0] + c[0]][input_num[1] + c[1]] = WHITE
-          end
-        end
-
-        # 碁盤の再表示
-        preview_goban(goban)
-
-        # 相手のターンの処理
-        # 裏返す碁の座標を格納する配列
-        reverse_array = []
-        # フラグ
-        flg = false
-        # 碁盤を一から走査
-        goban.each.with_index do |g, i|
-          g.each.with_index do |gg , ii|
-            # 黒の碁を探す
-            if gg == BLACK
-              # 黒の碁の周囲をチェック
-              check_array.each do |c|
-                # 白の碁があるかをチェック
-                p goban.dig(i + c[0], ii + c[1])
-                if goban.dig(i + c[0], ii + c[1]) == WHITE
-                  # 白の碁を配列に入れる
-                  reverse_array << [i + c[0], ii + c[1]]
-                  # 白の碁があった場合、その方向に黒の碁があるかをチェック
-                  x = i + c[0]
-                  y = ii + c[1]
-                  # フラグがtrueになるまで、その方向に進める
-                  while flg == false
-                    x += c[0]
-                    y += c[1]
-                    p goban.dig(x, y)
-                    case goban.dig(x, y)
-                    # 白の碁を配列に入れる
-                    when WHITE
-                      reverse_array << [x, y]
-                      next
-                    # nilの場合はそこに黒い碁をおきフラグをtrueにしてループを抜ける
-                    # todo: digを使わない方法があれば修正する
-                    when nil
-                      goban[x][y] = BLACK
-                      flg = true
-                    end
-                  end
-                  # フラグがtrueの場合、配列に入れた白の碁を黒に変換する
-                  if flg
-                    reverse_array.each do |r|
-                      goban[r[0]][r[1]] = BLACK
-                    end
-                  end
-                end
-                break if flg
-              end
-              break if flg
-            end
-            break if flg
-          end
-          break if flg
-        end
-
-        # 碁盤の再表示
-        preview_goban(goban)
+        myturn_goban = reverse_all_disks(goban, input_num, WHITE, BLACK)
+      else
+        puts "そこには置けません"
+        next
       end
+
+      # 碁盤の再表示
+      preview_goban(myturn_goban)
+
+      # 敵が置ける場所を探す
+      enemy_turn_goban = check_enemy_can_put(myturn_goban)
+
+      # 碁盤の再表示
+      preview_goban(enemy_turn_goban)
     end
+    puts "ゲーム終了"
+    puts "あなたの数 #{goban.flatten.count("○")}"
+    puts "相手の数 #{goban.flatten.count("●")}"
+    puts "#{goban.flatten.count("○") > goban.flatten.count("●") ? "あなたの勝ち" : "あなたの負け"}"
+  end
 
-  def make_field(goban_num, goban)
+  def make_field
     # 碁盤の作成
-      goban_num.times do
-        goban << [nil, nil, nil, nil]
-      end
-
+      goban = Array.new(GOBAN_NUM) { Array.new(GOBAN_NUM, BLANK) }
       # 初期位置に碁を交互に置く
-      goban[1][1] = WHITE
-      goban[1][2] = BLACK
-      goban[2][1] = BLACK
-      goban[2][2] = WHITE
+      goban[3][3] = WHITE
+      goban[3][4] = BLACK
+      goban[4][3] = BLACK
+      goban[4][4] = WHITE
+      goban
   end
 
   def preview_goban(goban)
     # 碁盤の表示
     goban.each do |g|
-      s = g.map do |gg|
-        if gg == WHITE
-            "○"
-        elsif gg == BLACK
-            "●"
-        else
-            " "
+      p g
+    end
+  end
+
+  def check_if_disk_can_put(goban, input_num, my_color, enemy_color)
+    ok_flg = false
+    CHECKING_DIRECTIONS.each do |c|
+      x = input_num[0]
+      y = input_num[1]
+     if goban.dig(x + c[0], y + c[1]) == enemy_color
+        puts "チェックしてる場所 #{c}"
+        puts "置けるばしょ [#{x + c[0]},#{y + c[1]}]"
+        puts "置いたばしょ [#{x},#{y}]"
+        while x >= 0 && x < GOBAN_NUM && y >= 0 && y < GOBAN_NUM
+          x += c[0]
+          y += c[1]
+          if goban.dig(x, y) == my_color
+            puts "[#{x},#{y}]は大丈夫"
+            ok_flg = true
+            break
+          elsif goban.dig(x, y) == BLANK
+            break
+          end
         end
       end
-      p s
+      break if ok_flg
     end
+    #p ok_flg
+    return ok_flg
+  end
+
+  def reverse_all_disks(goban, input_num, my_color, enemy_color)
+    CHECKING_DIRECTIONS.each do |c|
+      my_reverse_array = []
+      x = input_num[0]
+      y = input_num[1]
+      if goban.dig(x + c[0], y + c[1]) == enemy_color
+        while x + c[0] >= 0 && x + c[0] < GOBAN_NUM && y + c[1] >= 0 && y + c[1] < GOBAN_NUM
+          x += c[0]
+          y += c[1]
+          case goban.dig(x, y)
+          when enemy_color
+            #puts "敵の碁がある場所 [#{x},#{y}]"
+            my_reverse_array << [x, y]
+          when my_color
+            #puts "自分の色の碁がある場所 [#{x},#{y}]"
+            #puts "#{goban.dig(x, y)}"
+            #p my_reverse_array
+            my_reverse_array.each do |mr|
+              goban[mr[0]][mr[1]] = my_color
+            end
+            next
+          end
+        end
+      end
+    end
+    return goban
+  end
+
+  def check_enemy_can_put(goban)
+    flg = false
+    goban.each.with_index do |g, i|
+      g.each.with_index do |gg, ii|
+        # 黒の碁を探す
+        if gg == BLANK
+          p "空白の場所 [#{i},#{ii}]"
+          if check_if_disk_can_put(goban, [i, ii], BLACK, WHITE)
+            # 入力された箇所に黒の碁を置く
+            goban[i][ii] = BLACK
+            goban = reverse_all_disks(goban, [i, ii], BLACK, WHITE)
+            flg = true
+            break
+          end
+        end
+        break if flg
+      end
+      break if flg
+    end
+    return goban
   end
 end
 
