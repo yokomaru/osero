@@ -9,6 +9,7 @@ class Osero
     goban = make_field
     # 碁盤のチェック用配列
     preview_goban(goban)
+
     # 碁盤に置ける場所がなくなるまでループ
     while goban.flatten.include?(".") do
       puts "あなたは○です。置きたいところを入力してください"
@@ -123,7 +124,8 @@ class Osero
       if goban.dig(x + c[0], y + c[1]) == enemy_color
         x += c[0]
         y += c[1]
-        while x >= 0 && x < GOBAN_NUM && y >= 0 && y < GOBAN_NUM
+        # 碁盤の範囲内で自分のコマが見つかるまでループ
+        while x.between?(0, GOBAN_NUM - 1) && y.between?(0, GOBAN_NUM - 1)
           if goban.dig(x, y) == my_color
             return true
           elsif goban.dig(x, y) == BLANK
