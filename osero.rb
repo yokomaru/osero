@@ -32,6 +32,7 @@ class Osero
       # 碁盤の再表示
       preview_goban(myturn_goban)
 
+      puts "相手(●)のターンです。"
       # 敵が置ける場所を探す
       enemy_turn_goban = check_enemy_can_put(myturn_goban)
       # 碁盤の再表示
