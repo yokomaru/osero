@@ -21,6 +21,9 @@ class Osero
       input_num = input_val.chomp.split(",").map(&:to_i)
 
       # 入力値チェック
+      # TODO:既に碁が置かれている場所を指定していないか
+      # TODO:指定の仕方が間違っていないか
+      # TODO:integer以外が入力されていないか
       next if input_num.size == 1
 
       if check_if_disk_can_put(grid_board, input_num, WHITE, BLACK)
