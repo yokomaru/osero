@@ -197,3 +197,6 @@ class Osero
     input_val.chomp.split(",").map(&:to_i)
   end
 end
+
+osero = Osero.new
+osero.game_start
