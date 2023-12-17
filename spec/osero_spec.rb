@@ -49,6 +49,5 @@ RSpec.describe Osero do
         expect(osero.check_input_num_array_content([nil, 1])).to eq true
       end
     end
-
   end
 end
