@@ -2,5 +2,5 @@
 
 実行方法
 ```.rb
-ruby lib/osero.rb
+ruby osero_start.rb
 ```
