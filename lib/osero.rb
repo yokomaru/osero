@@ -2,7 +2,7 @@ class Osero
   WHITE = "○"
   BLACK = "●"
   BLANK = "."
-  GRID_BOARD_NUM = 4
+  GRID_BOARD_NUM = 6
   CHECKING_DIRECTIONS = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 0], [0, 1], [1, -1], [1, 0], [1, 1]]
 
   def game_start
@@ -49,9 +49,9 @@ class Osero
     grid_board = Array.new(GRID_BOARD_NUM) { Array.new(GRID_BOARD_NUM, BLANK) }
     # 初期位置に碁を交互に置く
     grid_board[2][2] = WHITE
-    grid_board[1][2] = BLACK
-    grid_board[2][1] = BLACK
-    grid_board[1][1] = WHITE
+    grid_board[3][2] = BLACK
+    grid_board[2][3] = BLACK
+    grid_board[3][3] = WHITE
     grid_board
   end
 
@@ -172,7 +172,7 @@ class Osero
     return grid_board
   end
 
-  def game_result(g)
+  def game_result(grid_board)
     result << "ゲーム終了"
     result << "あなたの数 #{g.flatten.count(WHITE)}"
     result << "相手の数 #{g.flatten.count(BLACK)}"

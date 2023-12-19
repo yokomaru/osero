@@ -10,7 +10,7 @@ RSpec.describe Osero do
   describe 'method' do
     describe 'make_field' do
       example '4x4の配列を返すこと' do
-        expect(osero.make_field).to eq [[".", ".", ".", "."], [".", "○", "●", "."], [".", "●", "○", "."], [".", ".", ".", "."]]
+        expect(osero.make_field).to eq [[".", ".", ".", ".", ".", "."], [".", ".", ".", ".", ".", "."], [".", ".", "○", "●", ".", "."], [".", ".", "●", "○", ".", "."], [".", ".", ".", ".", ".", "."], [".", ".", ".", ".", ".", "."]]
       end
     end
 
